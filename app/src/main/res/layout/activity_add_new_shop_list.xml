@@ -109,7 +109,7 @@
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
                     android:singleLine="true"
-                    android:text="@string/type_your_shopping_list_here"
+                    android:hint="@string/type_your_shopping_list_here"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
