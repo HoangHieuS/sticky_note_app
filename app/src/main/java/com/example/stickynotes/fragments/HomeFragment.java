@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
@@ -32,8 +30,6 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
     ImageView addNotes;
-    ActivityResultLauncher<String> addNote;
-    public static final int REQUEST_CODE_AND_NOTE = 1;
 
     private RecyclerView noteRec;
     private List<NoteEntities> noteEntitiesList;
@@ -65,7 +61,6 @@ public class HomeFragment extends Fragment {
     }
 
 
-
     private void getAllNotes() {
 
         @SuppressLint("StaticFieldLeak")
@@ -95,23 +90,11 @@ public class HomeFragment extends Fragment {
         new GetNoteTask().execute();
     }
 
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        if (requestCode == REQUEST_CODE_AND_NOTE && resultCode == RESULT_OK) {
-//            getAllNotes();
-//        }
-//    }
-
     ActivityResultLauncher<Intent> mAddNotes = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == RESULT_OK) {
-                        getAllNotes();
-                    }
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    getAllNotes();
                 }
             });
 }

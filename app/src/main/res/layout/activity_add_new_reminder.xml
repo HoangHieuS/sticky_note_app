@@ -33,6 +33,7 @@
                 app:tint="@color/black" />
 
             <TextView
+                android:id="@+id/save_reminder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -62,7 +63,7 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/input_note_title"
+                android:id="@+id/input_reminder_title"
                 android:layout_width="360dp"
                 android:layout_height="50dp"
                 android:layout_below="@id/text_date_time"
@@ -82,7 +83,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/input_note_title"
+                android:layout_below="@id/input_reminder_title"
                 android:layout_centerHorizontal="true">
 
                 <View
@@ -105,6 +106,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <EditText
+                    android:id="@+id/input_reminder_text"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:background="@null"

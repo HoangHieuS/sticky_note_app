@@ -7,12 +7,14 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import com.example.stickynotes.entities.NoteEntities;
+import com.example.stickynotes.entities.ReminderEntities;
 
 import java.util.List;
 
 @Dao
 public interface NoteDao {
 
+    //NOTE//
     @Query("SELECT * FROM note ORDER BY id DESC")
     List<NoteEntities> getAllNotes();
 
@@ -21,4 +23,14 @@ public interface NoteDao {
 
     @Delete
     void deleteNote(NoteEntities noteEntities);
+
+    //REMINDER//
+    @Query("SELECT * FROM reminder ORDER BY id DESC")
+    List<ReminderEntities> getAllReminders();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertReminder(ReminderEntities reminderEntities);
+
+    @Delete
+    void deleteReminder(ReminderEntities reminderEntities);
 }

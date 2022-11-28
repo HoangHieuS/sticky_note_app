@@ -17,4 +17,6 @@
     <string name="type_your_reminder_here">Type Your Reminder Here</string>
     <string name="pick_your_sticky_note_color">Pick Your Sticky\n Note Color</string>
     <string name="type_your_shopping_list_here">Type Your Shopping List Here…</string>
+    <string name="heading">Heading</string>
+    <string name="date_and_time">Date and Time</string>
 </resources>
