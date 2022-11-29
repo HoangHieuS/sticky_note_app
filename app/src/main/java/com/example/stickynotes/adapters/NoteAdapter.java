@@ -1,5 +1,6 @@
 package com.example.stickynotes.adapters;
 
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
@@ -75,6 +76,12 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
             }
             else {
                 gradientDrawable.setColor(Color.parseColor("#FF937B"));
+            }
+            if (noteEntities.getImageUrl() != null){
+                roundedImageView.setImageBitmap(BitmapFactory.decodeFile(noteEntities.getImageUrl()));
+                roundedImageView.setVisibility(View.VISIBLE);
+            } else {
+                roundedImageView.setVisibility(View.GONE);
             }
         }
     }

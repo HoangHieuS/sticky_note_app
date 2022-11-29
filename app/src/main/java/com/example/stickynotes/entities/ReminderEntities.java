@@ -48,11 +48,11 @@ public class ReminderEntities implements Serializable {
         this.dateTime = dateTime;
     }
 
-    public String getNoteText() {
+    public String getReminderText() {
         return reminderText;
     }
 
-    public void setNoteText(String reminderText) {
+    public void setReminderText(String reminderText) {
         this.reminderText = reminderText;
     }
 

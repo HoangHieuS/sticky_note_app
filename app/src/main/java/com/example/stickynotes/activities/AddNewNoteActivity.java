@@ -1,12 +1,23 @@
 package com.example.stickynotes.activities;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -19,6 +30,7 @@ import com.example.stickynotes.database.NoteDatabase;
 import com.example.stickynotes.entities.NoteEntities;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -29,6 +41,12 @@ public class AddNewNoteActivity extends AppCompatActivity {
     private TextView textDateTime, saveNote;
     private View leftIndicator, rightIndicator;
     String selectedColor;
+
+    private ImageView addImage;
+    private String selectedImg;
+
+    public static final int STORAGE_PERMISSION = 1;
+    public static final int SELECT_IMG = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +59,10 @@ public class AddNewNoteActivity extends AppCompatActivity {
         inputNoteText = findViewById(R.id.input_note_text);
         inputNoteTitle = findViewById(R.id.input_note_title);
         textDateTime = findViewById(R.id.text_date_time);
+        addImage = findViewById(R.id.image_note);
 
         selectedColor = "#FF937B";
+        selectedImg = "";
 
         saveNote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +101,7 @@ public class AddNewNoteActivity extends AppCompatActivity {
         noteEntities.setNoteText(inputNoteText.getText().toString());
         noteEntities.setDateTime(textDateTime.getText().toString());
         noteEntities.setColor(selectedColor);
+        noteEntities.setImageUrl(selectedImg);
 
         class SaveNote extends AsyncTask<Void, Void, Void> {
 
@@ -105,14 +126,14 @@ public class AddNewNoteActivity extends AppCompatActivity {
         new SaveNote().execute();
     }
 
-    private void bottomSheet(){
+    private void bottomSheet() {
 
         final LinearLayout linearLayout = findViewById(R.id.bottom_sheet_layout);
         final BottomSheetBehavior<LinearLayout> bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
         linearLayout.findViewById(R.id.bottom_sheet_text).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED ){
+                if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
             }
@@ -210,5 +231,85 @@ public class AddNewNoteActivity extends AppCompatActivity {
             }
         });
 
+        linearLayout.findViewById(R.id.add_image).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                if (ContextCompat.checkSelfPermission(
+                        getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(
+                            AddNewNoteActivity.this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            STORAGE_PERMISSION
+                    );
+                } else {
+                    selectImage();
+                }
+            }
+        });
+
+    }
+
+    private void selectImage() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, SELECT_IMG);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == STORAGE_PERMISSION && grantResults.length > 0) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                selectImage();
+            } else {
+                Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SELECT_IMG && resultCode == RESULT_OK) {
+            if (data != null) {
+                Uri selectedImageUri = data.getData();
+                if (selectedImageUri != null) {
+                    try {
+
+                        InputStream inputStream = getContentResolver().openInputStream(selectedImageUri);
+                        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                        addImage.setImageBitmap(bitmap);
+                        addImage.setVisibility(View.VISIBLE);
+                        selectedImg = getPathFromUri(selectedImageUri);
+
+                    } catch (Exception e) {
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }
+    }
+
+    private String getPathFromUri(Uri uri) {
+
+        String filePath;
+        Cursor cursor = getContentResolver()
+                .query(uri, null, null, null, null);
+
+        if (cursor == null) {
+            filePath = uri.getPath();
+        } else {
+            cursor.moveToFirst();
+            int index = cursor.getColumnIndex("_data");
+            filePath = cursor.getString(index);
+            cursor.close();
+        }
+        return filePath;
     }
 }

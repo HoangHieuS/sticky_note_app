@@ -42,7 +42,7 @@ public class AddNewReminderActivity extends AppCompatActivity {
         textDateTime = findViewById(R.id.text_date_time);
         reminderView = findViewById(R.id.view_reminder);
 
-        selectReminderColor = "#FFFB7B";
+        selectReminderColor = "#FF937B";
 
         saveReminder.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,7 +69,7 @@ public class AddNewReminderActivity extends AppCompatActivity {
 
         final ReminderEntities reminderEntities = new ReminderEntities();
         reminderEntities.setTitle(reminderTitle.getText().toString());
-        reminderEntities.setNoteText(reminderText.getText().toString());
+        reminderEntities.setReminderText(reminderText.getText().toString());
         reminderEntities.setDateTime(textDateTime.getText().toString());
         reminderEntities.setColor(selectReminderColor);
 
