@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-import com.example.stickynotes.dao.NoteDao;
+import com.example.stickynotes.dao.NoteDAO;
 import com.example.stickynotes.entities.NoteEntities;
 import com.example.stickynotes.entities.ReminderEntities;
 
@@ -27,5 +27,5 @@ public abstract class NoteDatabase extends RoomDatabase {
         return noteDatabase;
     }
 
-    public abstract NoteDao noteDao();
+    public abstract NoteDAO noteDao();
 }

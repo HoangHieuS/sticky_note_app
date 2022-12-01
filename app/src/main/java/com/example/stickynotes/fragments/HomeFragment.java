@@ -60,13 +60,13 @@ public class HomeFragment extends Fragment implements NoteListeners {
         noteAdapter = new NoteAdapter(noteEntitiesList, this);
         noteRec.setAdapter(noteAdapter);
 
-        getAllNotes(SHOW_NOTE);
+        getAllNotes(SHOW_NOTE, false);
 
         return view;
     }
 
 
-    private void getAllNotes(final int requestCode) {
+    private void getAllNotes(final int requestCode,final boolean isNoteDeleted) {
 
         @SuppressLint("StaticFieldLeak")
         class GetNoteTask extends AsyncTask<Void, Void, List<NoteEntities>> {
@@ -87,8 +87,13 @@ public class HomeFragment extends Fragment implements NoteListeners {
                     noteAdapter.notifyDataSetChanged();
                 } else if (requestCode == UPDATE_NOTE){
                     noteEntitiesList.remove(clickedPosition);
-                    noteEntitiesList.add(clickedPosition, noteEntities.get(clickedPosition));
-                    noteAdapter.notifyItemChanged(clickedPosition);
+
+                    if (isNoteDeleted) {
+                        noteAdapter.notifyItemRemoved(clickedPosition);
+                    } else {
+                        noteEntitiesList.add(clickedPosition, noteEntities.get(clickedPosition));
+                        noteAdapter.notifyItemChanged(clickedPosition);
+                    }
                 }
                 else {
                     noteEntitiesList.add(0, noteEntities.get(0));
@@ -106,10 +111,10 @@ public class HomeFragment extends Fragment implements NoteListeners {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_AND_NOTE && resultCode == RESULT_OK) {
-            getAllNotes(REQUEST_CODE_AND_NOTE);
+            getAllNotes(REQUEST_CODE_AND_NOTE, false);
         } else if (requestCode == UPDATE_NOTE && resultCode == RESULT_OK) {
             if (data != null) {
-                getAllNotes(UPDATE_NOTE);
+                getAllNotes(UPDATE_NOTE, data.getBooleanExtra("isNoteDeleted", false));
             }
         }
     }

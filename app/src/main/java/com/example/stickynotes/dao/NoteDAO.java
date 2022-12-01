@@ -12,7 +12,7 @@ import com.example.stickynotes.entities.ReminderEntities;
 import java.util.List;
 
 @Dao
-public interface NoteDao {
+public interface NoteDAO {
 
     //NOTE//
     @Query("SELECT * FROM note ORDER BY id DESC")

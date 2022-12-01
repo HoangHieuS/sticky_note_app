@@ -2,6 +2,7 @@ package com.example.stickynotes.activities;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -13,12 +14,15 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -49,6 +53,8 @@ public class AddNewNoteActivity extends AppCompatActivity {
 
     public static final int STORAGE_PERMISSION = 1;
     public static final int SELECT_IMG = 1;
+
+    private AlertDialog alertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -315,6 +321,71 @@ public class AddNewNoteActivity extends AppCompatActivity {
             }
         });
 
+        if (alreadyAvailableNote != null) {
+            linearLayout.findViewById(R.id.remove).setVisibility(View.VISIBLE);
+            linearLayout.findViewById(R.id.remove).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    showDeleteDialog();
+                }
+            });
+        }
+
+    }
+
+    private void showDeleteDialog() {
+
+        if (alertDialog == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(AddNewNoteActivity.this);
+            View view = LayoutInflater.from(this).inflate(R.layout.layout_delete_note_dialog,
+                    (ViewGroup) findViewById(R.id.layout_delete_note_container));
+
+            builder.setView(view);
+            alertDialog = builder.create();
+
+            if (alertDialog.getWindow() != null) {
+                alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
+            }
+            view.findViewById(R.id.text_delete_note).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    class DeleteNoteTask extends AsyncTask<Void, Void, Void> {
+
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+
+                            NoteDatabase.getNoteDatabase(getApplicationContext())
+                                    .noteDao()
+                                    .deleteNote(alreadyAvailableNote);
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void unused) {
+                            super.onPostExecute(unused);
+
+                            Intent intent = new Intent();
+                            intent.putExtra("isNoteDeleted", true);
+                            setResult(RESULT_OK,intent);
+                            finish();
+                        }
+                    }
+
+                    new DeleteNoteTask().execute();
+                }
+            });
+
+            view.findViewById(R.id.text_cancel_note).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    alertDialog.dismiss();
+                }
+            });
+        }
+
+        alertDialog.show();
     }
 
     private void selectImage() {
