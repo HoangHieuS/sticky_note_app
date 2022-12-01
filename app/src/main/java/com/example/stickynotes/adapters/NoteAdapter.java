@@ -3,6 +3,8 @@ package com.example.stickynotes.adapters;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Looper;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,16 +19,23 @@ import com.example.stickynotes.entities.NoteEntities;
 import com.example.stickynotes.listeners.NoteListeners;
 import com.makeramen.roundedimageview.RoundedImageView;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
     List<NoteEntities> noteEntitiesList;
     NoteListeners noteListeners;
 
+    private List<NoteEntities> noteSearch;
+    private Timer timer;
+
     public NoteAdapter(List<NoteEntities> noteEntitiesList, NoteListeners noteListeners) {
         this.noteEntitiesList = noteEntitiesList;
         this.noteListeners = noteListeners;
+        noteSearch = noteEntitiesList;
     }
 
     @NonNull
@@ -89,6 +98,45 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
             } else {
                 roundedImageView.setVisibility(View.GONE);
             }
+        }
+    }
+
+    public void searchNote(final String searchKeyword) {
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                if (searchKeyword.trim().isEmpty()) {
+                    noteEntitiesList = noteSearch;
+                } else {
+                    ArrayList<NoteEntities> temp = new ArrayList<>();
+                    for (NoteEntities entities : noteSearch) {
+
+                        if (entities.getTitle().toLowerCase().contains(searchKeyword.toLowerCase())
+                        || entities.getNoteText().toLowerCase().contains(searchKeyword.toLowerCase())) {
+
+                            temp.add(entities);
+
+                        }
+                    }
+                    noteEntitiesList = temp;
+                }
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        notifyDataSetChanged();
+                    }
+                });
+
+            }
+        },500);
+    }
+
+    public void cancelTimer() {
+        if (timer != null) {
+            timer.cancel();
         }
     }
 }

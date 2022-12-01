@@ -12,9 +12,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.example.stickynotes.R;
@@ -59,6 +62,26 @@ public class HomeFragment extends Fragment implements NoteListeners {
         noteEntitiesList = new ArrayList<>();
         noteAdapter = new NoteAdapter(noteEntitiesList, this);
         noteRec.setAdapter(noteAdapter);
+
+        EditText inputSearch = view.findViewById(R.id.input_search_keyword);
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                noteAdapter.cancelTimer();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (noteEntitiesList.size() != 0) {
+                    noteAdapter.searchNote(editable.toString());
+                }
+            }
+        });
 
         getAllNotes(SHOW_NOTE, false);
 

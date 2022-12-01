@@ -24,7 +24,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/input_search_keyword"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_margin="7dp"
@@ -48,9 +48,9 @@
         android:background="@drawable/search_bg"
         android:padding="10dp"
         android:src="@drawable/ic_baseline_person_24"
-        app:layout_constraintBottom_toBottomOf="@id/editText"
+        app:layout_constraintBottom_toBottomOf="@id/input_search_keyword"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/editText" />
+        app:layout_constraintStart_toEndOf="@+id/input_search_keyword" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/note_rec"
@@ -65,7 +65,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText" />
+        app:layout_constraintTop_toBottomOf="@+id/input_search_keyword" />
 
     <ImageView
         android:id="@+id/add_notes"
