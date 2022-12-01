@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.stickynotes.R;
 import com.example.stickynotes.entities.NoteEntities;
+import com.example.stickynotes.listeners.NoteListeners;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.util.List;
@@ -21,9 +22,11 @@ import java.util.List;
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
     List<NoteEntities> noteEntitiesList;
+    NoteListeners noteListeners;
 
-    public NoteAdapter(List<NoteEntities> noteEntitiesList) {
+    public NoteAdapter(List<NoteEntities> noteEntitiesList, NoteListeners noteListeners) {
         this.noteEntitiesList = noteEntitiesList;
+        this.noteListeners = noteListeners;
     }
 
     @NonNull
@@ -37,6 +40,9 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull NoteAdapter.ViewHolder holder, int position) {
 
         holder.setNote(noteEntitiesList.get(position));
+        holder.linearLayout.setOnClickListener(view -> noteListeners
+                .noteClick(noteEntitiesList
+                        .get(holder.getAdapterPosition()), holder.getAdapterPosition()));
     }
 
     @Override
@@ -51,8 +57,8 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView title, textNote, dateTime;
-        private LinearLayout linearLayout;
+        private final TextView title, textNote, dateTime;
+        private final LinearLayout linearLayout;
         RoundedImageView roundedImageView;
 
         public ViewHolder(@NonNull View itemView){

@@ -7,8 +7,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -23,13 +22,19 @@ import com.example.stickynotes.activities.AddNewNoteActivity;
 import com.example.stickynotes.adapters.NoteAdapter;
 import com.example.stickynotes.database.NoteDatabase;
 import com.example.stickynotes.entities.NoteEntities;
+import com.example.stickynotes.listeners.NoteListeners;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements NoteListeners {
 
     ImageView addNotes;
+    public static final int REQUEST_CODE_AND_NOTE = 1;
+    public static final int UPDATE_NOTE = 2;
+    public static final int SHOW_NOTE = 3;
+
+    private int clickedPosition = -1;
 
     private RecyclerView noteRec;
     private List<NoteEntities> noteEntitiesList;
@@ -47,21 +52,21 @@ public class HomeFragment extends Fragment {
         Intent intent = new Intent(getContext(), AddNewNoteActivity.class);
 
         addNotes = view.findViewById(R.id.add_notes);
-        addNotes.setOnClickListener(v -> mAddNotes.launch(intent));
+        addNotes.setOnClickListener(v -> startActivityForResult(intent, REQUEST_CODE_AND_NOTE));
 
         noteRec = view.findViewById(R.id.note_rec);
         noteRec.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         noteEntitiesList = new ArrayList<>();
-        noteAdapter = new NoteAdapter(noteEntitiesList);
+        noteAdapter = new NoteAdapter(noteEntitiesList, this);
         noteRec.setAdapter(noteAdapter);
 
-        getAllNotes();
+        getAllNotes(SHOW_NOTE);
 
         return view;
     }
 
 
-    private void getAllNotes() {
+    private void getAllNotes(final int requestCode) {
 
         @SuppressLint("StaticFieldLeak")
         class GetNoteTask extends AsyncTask<Void, Void, List<NoteEntities>> {
@@ -76,10 +81,16 @@ public class HomeFragment extends Fragment {
             @Override
             protected void onPostExecute(List<NoteEntities> noteEntities) {
                 super.onPostExecute(noteEntities);
-                if (noteEntitiesList.size() == 0) {
+
+                if (requestCode == SHOW_NOTE) {
                     noteEntitiesList.addAll(noteEntities);
                     noteAdapter.notifyDataSetChanged();
-                } else {
+                } else if (requestCode == UPDATE_NOTE){
+                    noteEntitiesList.remove(clickedPosition);
+                    noteEntitiesList.add(clickedPosition, noteEntities.get(clickedPosition));
+                    noteAdapter.notifyItemChanged(clickedPosition);
+                }
+                else {
                     noteEntitiesList.add(0, noteEntities.get(0));
                     noteAdapter.notifyItemInserted(0);
                 }
@@ -90,11 +101,27 @@ public class HomeFragment extends Fragment {
         new GetNoteTask().execute();
     }
 
-    ActivityResultLauncher<Intent> mAddNotes = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    getAllNotes();
-                }
-            });
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_AND_NOTE && resultCode == RESULT_OK) {
+            getAllNotes(REQUEST_CODE_AND_NOTE);
+        } else if (requestCode == UPDATE_NOTE && resultCode == RESULT_OK) {
+            if (data != null) {
+                getAllNotes(UPDATE_NOTE);
+            }
+        }
+    }
+
+    @Override
+    public void noteClick(NoteEntities noteEntities, int position) {
+
+        clickedPosition = position;
+        Intent intent = new Intent(getContext().getApplicationContext(), AddNewNoteActivity.class);
+        intent.putExtra("updateOrView", true);
+        intent.putExtra("notes", noteEntities);
+        startActivityForResult(intent, UPDATE_NOTE);
+
+    }
 }

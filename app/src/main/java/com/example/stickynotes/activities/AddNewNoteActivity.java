@@ -43,7 +43,9 @@ public class AddNewNoteActivity extends AppCompatActivity {
     String selectedColor;
 
     private ImageView addImage;
-    private String selectedImg;
+    private String imageUrl;
+
+    private NoteEntities alreadyAvailableNote;
 
     public static final int STORAGE_PERMISSION = 1;
     public static final int SELECT_IMG = 1;
@@ -62,7 +64,12 @@ public class AddNewNoteActivity extends AppCompatActivity {
         addImage = findViewById(R.id.image_note);
 
         selectedColor = "#FF937B";
-        selectedImg = "";
+        imageUrl = "";
+
+        if (getIntent().getBooleanExtra("updateOrView", false)) {
+            alreadyAvailableNote = (NoteEntities) getIntent().getSerializableExtra("notes");
+            setViewUpdate();
+        }
 
         saveNote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,8 +83,35 @@ public class AddNewNoteActivity extends AppCompatActivity {
                         .format(new Date())
         );
 
+        findViewById(R.id.img_remove).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addImage.setImageBitmap(null);
+                addImage.setVisibility(View.GONE);
+                findViewById(R.id.img_remove).setVisibility(View.GONE);
+
+                imageUrl = "";
+            }
+        });
+
         bottomSheet();
         setViewColor();
+    }
+
+    private void setViewUpdate() {
+
+        inputNoteTitle.setText(alreadyAvailableNote.getTitle());
+        inputNoteText.setText(alreadyAvailableNote.getNoteText());
+        textDateTime.setText(alreadyAvailableNote.getDateTime());
+
+        if (alreadyAvailableNote.getImageUrl() != null && !alreadyAvailableNote.getImageUrl().trim().isEmpty()) {
+
+            addImage.setImageBitmap(BitmapFactory.decodeFile(alreadyAvailableNote.getImageUrl()));
+            addImage.setVisibility(View.VISIBLE);
+            findViewById(R.id.img_remove).setVisibility(View.VISIBLE);
+            imageUrl = alreadyAvailableNote.getImageUrl();
+
+        }
     }
 
     private void setViewColor() {
@@ -101,7 +135,11 @@ public class AddNewNoteActivity extends AppCompatActivity {
         noteEntities.setNoteText(inputNoteText.getText().toString());
         noteEntities.setDateTime(textDateTime.getText().toString());
         noteEntities.setColor(selectedColor);
-        noteEntities.setImageUrl(selectedImg);
+        noteEntities.setImageUrl(imageUrl);
+
+        if (alreadyAvailableNote != null) {
+            noteEntities.setId(alreadyAvailableNote.getId());
+        }
 
         class SaveNote extends AsyncTask<Void, Void, Void> {
 
@@ -231,6 +269,33 @@ public class AddNewNoteActivity extends AppCompatActivity {
             }
         });
 
+        if (alreadyAvailableNote != null
+                && alreadyAvailableNote.getColor() != null
+                    && !alreadyAvailableNote.getColor().trim().isEmpty()) {
+
+            switch (alreadyAvailableNote.getColor()) {
+                case "#FFFB7B":
+                    linearLayout.findViewById(R.id.viewColor2).performClick();
+                    break;
+
+                case "#ADFF7B":
+                    linearLayout.findViewById(R.id.viewColor3).performClick();
+                    break;
+
+                case "#96FFEA":
+                    linearLayout.findViewById(R.id.viewColor4).performClick();
+                    break;
+
+                case "#969CFF":
+                    linearLayout.findViewById(R.id.viewColor5).performClick();
+                    break;
+
+                case "#FF96F5":
+                    linearLayout.findViewById(R.id.viewColor6).performClick();
+                    break;
+            }
+        }
+
         linearLayout.findViewById(R.id.add_image).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -286,7 +351,8 @@ public class AddNewNoteActivity extends AppCompatActivity {
                         Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                         addImage.setImageBitmap(bitmap);
                         addImage.setVisibility(View.VISIBLE);
-                        selectedImg = getPathFromUri(selectedImageUri);
+                        imageUrl = getPathFromUri(selectedImageUri);
+                        findViewById(R.id.img_remove).setVisibility(View.VISIBLE);
 
                     } catch (Exception e) {
                         Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
